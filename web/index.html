@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Сводные данные CC&B</title>
+        <meta charset="UTF-8">
+        <script>
+            var oldInternetExplorer = false;
+        </script>
+        <!--[if lt IE 9]>
+            <script>
+                oldInternetExplorer = true;
+            </script>
+        <![endif]-->
+        <script type='text/javascript' src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.js"></script>
+        <script type='text/javascript' src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css">
+        <script type="text/javascript">
+            var months = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+            $(function() {
+                if (!oldInternetExplorer) {
+                    console.debug("Start loading page");
+                }
+                $( "#tabs" ).tabs();
+                // Региональные настройки datepicker, соответствующие русскому языку.
+                $.datepicker.regional['ru'] = { 
+                    closeText: 'Выбрать',
+                    prevText: '&#x3c;Пред',
+                    nextText: 'След&#x3e;',
+                    currentText: 'Сегодня',
+                    monthNames: months,
+                    monthNamesShort: months,
+                    firstDay: 1,
+                    isRTL: false
+                }; 
+                $.datepicker.setDefaults($.datepicker.regional['ru']);
+                
+                // Устанваливаем поведение datepicker.
+                $('#startDate').datepicker({
+                    dateFormat: "MM yy",
+                    changeMonth: true,
+                    changeYear: true,
+                    showButtonPanel: true,
+                    onClose: function(dateText, inst) {
+
+                        function isDonePressed(){
+                            if (!oldInternetExplorer) {
+                                console.debug("done pressed");
+                            }
+                            return ($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1);
+                        }
+
+                        if (isDonePressed()){
+                            if (!oldInternetExplorer) {
+                                console.debug("Is done pressed");
+                            }
+                            var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                            var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                            $(this).datepicker('setDate', new Date(year, month, 1)).trigger('change');
+
+                             $('#startDate').focusout();//Added to remove focus from datepicker input box on selecting date
+                        };
+                    }
+                });
+                document.getElementById('cancel').setAttribute('disabled', 'disabled');
+                
+                if (!oldInternetExplorer) {
+                    console.debug("Loading page complete");
+                }
+            });
+            function start() {
+                if (!oldInternetExplorer) {
+                    console.debug("Pressed button START");
+                }
+                var date = document.getElementById("startDate").value;
+                
+                
+                alert(convertSelectedDate(date));
+                
+                return;
+                swreset();
+                swstart();
+            };
+            function cancel() {
+                if (!oldInternetExplorer) {
+                    console.debug("Pressed button CANCEL");
+                }
+                alert("Прервано пользователем");
+                swstop();
+            };
+            var ms = 0;
+            var state = 0;
+            function swstart() {
+                if (!oldInternetExplorer) {
+                    console.debug("function swstart()");
+                }
+                if ($('#startDate').val() === '') {
+                    console.log("Date is empty");
+                    return;
+                }
+                state = 1;
+                then = new Date();
+                then.setTime(then.getTime() - ms);
+                document.getElementById('start').setAttribute('disabled', 'disabled');
+                document.getElementById('cancel').removeAttribute('disabled');
+            }
+            function swstop() {
+                if (!oldInternetExplorer) {
+                    console.debug("function swstop()");
+                }
+                state = 0;
+                now = new Date();
+                ms = now.getTime() - then.getTime();
+                $('#time').val(toTome(parseInt( ms / 1000, 10)));
+                document.getElementById('start').removeAttribute('disabled');
+            }
+            function swreset() {
+                if (!oldInternetExplorer) {
+                    console.debug("function swreset()");
+                }
+                state = 0;
+                ms = 0;
+                $('#time').val(toTome(ms));
+                document.getElementById('start').removeAttribute('disabled');
+            }
+            function display() {
+                setTimeout("display();", 50);
+                if (state === 1) {
+                    now = new Date();
+                    ms = now.getTime() - then.getTime();
+                    $('#time').val(toTome(parseInt( ms / 1000, 10)));
+                }
+                else {
+                    //document.stpw.download.disabled = false;
+                    $('#time').val(toTome(0));
+                }
+            }
+            function toTome(ticks) {
+                var minuts = parseInt(ticks / 60, 10);
+                var second = ticks - minuts * 60;
+                if (second < 10) {
+                    second = '0' + second;
+                }
+                return minuts + ':' + second;
+            }
+            function timeLimitCheck() {
+//                var edit = document.getElementById("timeLimitValue");
+//                var checkbox = document.getElementById("timeLimitCheck");
+//                edit.disabled = checkbox.checked;
+                alert('kkk');
+            }
+            function downloadPrevoiusFile(link) {
+                var filename = link.innerHTML;
+                if (confirm('Скачать файл "' + filename + '"?')) {
+                    alert('Начато скачивание файла "' + filename + '"...');
+                }
+            }
+            function deletePreviousFile() {
+                if (confirm('Удалить выбранный файл?')) {
+                    alert('Файл типа удалён...');
+                }
+            }
+            function deleteAllPreviousFiles() {
+                if (confirm('Удалить файлы предыдущих выгрузок?')) {
+                    alert('Файлы типа удалены... Креведко!');
+                }
+            }
+            function convertSelectedDate(sdate) {
+                var splits = sdate.split(/\s+/);
+                var month = splits[0];
+                var year = splits[1];
+                
+                for (var i = 0; i < months.length; i++) {
+                    if (month === months[i]) {
+                        return '01.' + ((i + 1) < 10 ? '0' + (i + 1) : (i + 1)) + '.' + year;
+                    }
+                }
+            }
+        </script>
+        <style type="text/css">
+            .ui-datepicker-calendar {
+                display: none;
+            }
+            table, th, td {
+                border: 1px solid black; /* Рамка вокруг таблицы */
+                padding: 5px;
+            }
+            .actions {
+                /*margin: 4px;*/
+            }
+            .warning {
+                border: solid 1px black;
+                background-color: #ffcc99;
+                padding: 10px;
+            }
+            .group-elem {
+                border: solid 1px black;
+                padding: 10px;
+            }
+            a {
+                color: blue;
+            }
+        </style>
+    </head>
+    <body onLoad="display();">
+        <div id="tabs">
+            <ul>
+                <li><a href="#tab1">Новая выгрузка</a></li>
+                <li><a href="#tab2">Предыдущие выгрузки</a></li>
+                <li><a href="#tab3">Настройки</a></li>
+            </ul>
+            <div id="tab1">
+                <!-- Вкладка "Новая выгрузка" -->
+                <div class="group-elem">
+                    <div>
+                        <label for="startDate">Месяц выгрузки:</label>
+                        <input name="startDate" id="startDate" required />
+                    </div>
+                    <br/>
+                    <div>
+                        <label for="target" id="target_lbl" >Нужно выгрузить:</label>
+                        <select id="target">
+                            <option value="CHS">Частный сектор</option>
+                            <option value="MKD">МКД</option>
+                            <option value="UR">Юридические лица</option>
+                        </select>
+                    </div>
+                    <br/>
+                    <div>
+                        <label for="electricity">Электросети:</label>
+                        <select id="electricity">
+                            <option value="MRSK">Сети МРСК</option>
+                            <option value="OTHER">Сторонние сети</option>
+                        </select>
+                    </div>
+                    <br/>
+                    <div class="group-elem">
+                        <!-- Поскольку и формирование новых данных, и выгрузка
+                        данных в файл может занимать очень много времени,
+                        нужна опция выбора цели запуска. -->
+                        <input type="radio"
+                               name="dataDownloadChoice"
+                               id="newDataWithDownload"
+                               checked="checked">
+                        <label for="newDataWithDownload">Формирование и выгрузка</label>
+                        <br/>
+                        <input type="radio"
+                               name="dataDownloadChoice"
+                               id="onlyNewData">
+                        <label for="onlyNewData">Только формирование</label>
+                        <br/>
+                        <input type="radio"
+                               name="dataDownloadChoice"
+                               id="onlyDownload">
+                        <label for="onlyDownload">Только выгрузка</label>
+                    </div>
+                    <br/>
+                    <div>
+                        <input id="timeLimitCheck" type="checkbox" onchange="document.getElementById('timeLimitValue').disabled = !this.checked;">
+                        <label for="timeLimitCheck">Ограничить время запроса (мин.):</label>
+                        <input id="timeLimitValue" type="number" disabled>
+                    </div>
+                </div>
+                <br/>
+                <div>
+                    <input type="text" value="0:00" id="time" readonly tabindex="-1" />
+                    <button id="start" onclick="start();">Старт</button>
+                    <button id="cancel" onclick="cancel();">Отмена</button>
+                </div>
+            </div>
+            <div id="tab2">
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Файл выгрузки</th>
+                            <th>Дата формирования</th>
+                            <th>Лог</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th><button class="actions" onclick="deleteAllPreviousFiles()">Удалить всё</button></th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr>
+                            <td><a href="#" onclick="downloadPrevoiusFile(this)">chastny_sektor_03.2015.xlsx</a></td>
+                            <td>15.05.2015 13:26</td>
+                            <td><a href="#" onclick="downloadPrevoiusFile(this)">chastny_sektor_03.2015.log</a></td>
+                            <td><a href="#" onclick="deletePreviousFile()">Удалить</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="tab3">
+                <div class="warning">
+                Внимание! Ошибочное изменение или удаление файлов в этом 
+                разделе может повлечь частичную или полную неработоспособность
+                портала. Меняйте что-нибудь только в том случае, если точно знаете,
+                что делаете.
+                </div>
+                <br/>
+                <h4>SQL-запросы</h4>
+                <div>
+                    <table>
+                        <caption>Частный сектор</caption>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <a href="javascript:void(0)">Скачать</a>
+                                    <a href="javascript:void(0)">Назначить главным</a>
+                                    <a href="javascript:void(0)">Удалить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table>
+                        <caption>МКД</caption>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <a href="javascript:void(0)">Скачать</a>
+                                    <a href="javascript:void(0)">Назначить главным</a>
+                                    <a href="javascript:void(0)">Удалить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table>
+                        <caption>Юридические лица</caption>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <a href="javascript:void(0)">Скачать</a>
+                                    <a href="javascript:void(0)">Назначить главным</a>
+                                    <a href="javascript:void(0)">Удалить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h4>JAR-файлы</h4>
+                <div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <a href="javascript:void(0)">Скачать</a>
+                                    <a href="javascript:void(0)">Назначить главным</a>
+                                    <a href="javascript:void(0)">Удалить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h4>Логи</h4>
+                <div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <a href="javascript:void(0)">Скачать</a>
+                                    <a href="javascript:void(0)">Удалить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h4>Конфигурационные файлы</h4>
+                <div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
